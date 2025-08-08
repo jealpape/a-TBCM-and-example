@@ -1,0 +1,220 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amsfonts,amsthm}
+
+%opening
+\title{Triangular Body-Cover Model: \\ Description and Main Equations}
+\author{Gabriel A. Alzamendi}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+ This document describes the basics concepts in the Triangular Body-Cover model (TBCM) 
+ and the most important equations involved, as introduced in \cite{galindo_modeling_2017}. 
+ This document pays special attention to some improved/revisited rules.
+\end{abstract}
+
+\section{Dynamic equations in the TBCM}
+TBCM is a lumped-element biomechanical model of the vocal folds introduced in  \cite{galindo_modeling_2017}. 
+It is composed of three masses representing the cover-body structure of the human vocal folds, 
+where upper $m_{u}$ and lower $m_{l}$ masses constitute the cover layer,
+and the body mass $m_{b}$ emulates the internal body in the vocal fold. 
+The dynamic of the TBCM is described through a second order differential equations:
+\begin{equation} \label{Eq_S1s0_01}
+  \begin{aligned}
+    m_{u} \, \ddot{x}_{u} &= F_{k\,u} + F_{d\,u} - F_{kc} + F_{e\,u} + F_{col\,u}, \\
+    m_{l} \, \ddot{x}_{l} &= F_{k\,l} + F_{d\,l} + F_{kc} + F_{e\,l} + F_{col\,l}, \\
+    m_{b} \, \ddot{x}_{b} &= F_{k\,b} + F_{d\,b} - (F_{k\,u} + F_{d\,u} + F_{k\,l} + F_{d\,l}),
+  \end{aligned}
+\end{equation}
+where for $* \in \{u,l,b\}$ the variables $x_{*}$ describe the displacement of the masses with respect to 
+the rest (equilibrium) position $x_{0\,*}$.
+The force terms correspond to the (elastic) spring response ($F_{k\,*}$ and $F_{kc}$), the damping ($F_{d\,*}$), 
+the reaction during left-right vocal folds collision ($F_{col\,*}$), and aerodynamics force due to 
+glottal airflow ($F_{e\,*}$). The masses parameters $(m_{u}, \, m_{l}, \, m_{b} )$ are obtained as a function
+of the activation of laryngeal muscles \cite{titze_rules_2002}.
+
+According to the TBCM, the phonatory (triangular) glottal configuration is a function of arytenoid cartilage posturing. 
+Let $\xi_{u}$ and $\xi_{l}$ be the position of the posterior ends of the upper and lower masses, 
+respectively, due to medial-lateral vocal process displacement. 
+The equilibrium positions for the upper and lower masses are equal to the average horizontal glottal position:
+\begin{equation} \label{Eq_S1s0_02}
+  x_{0\,u} = \frac{\xi_{u}}{2}, \qquad \text{and} \qquad
+  x_{0\,l} = \frac{\xi_{l}}{2}.
+\end{equation}
+For the body mass, the equilibrium position $x_{0\,b} = 0.3$ cm.
+
+\subsection{Elastic spring forces}
+The spring forces are computed as follows:
+\begin{equation} \label{Eq_S1s1_01}
+  \begin{aligned}
+    F_{k\,u} & = -k_{u} \, \left[ \left[ (\delta_{u} - x_{0\,u}) - (x_{b} - x_{0\,b}) \right] +
+                \eta_{u} \left[ (\delta_{u} - x_{0\,u}) - (x_{b} - x_{0\,b}) \right]^3 \right], \\
+    F_{k\,l} & = -k_{l} \, \left[ \left[ (\delta_{l} - x_{0\,l}) - (x_{b} - x_{0\,b}) \right] +
+                \eta_{l} \left[ (\delta_{l} - x_{0\,l}) - (x_{b} - x_{0\,b}) \right]^3 \right], \\
+    F_{k\,b} & = -k_{b} \, \left[ \left(x_{b} - x_{0\,b} \right) +
+                \eta_{b} \left(x_{b} - x_{0\,b} \right)^3 \right], \\
+    F_{kc} & = -k_{c} \, \left[ (\delta_{u} - x_{0\,u}) - (\delta_{l} - x_{0\,l}) \right],
+  \end{aligned}
+\end{equation}
+where $\delta_{u} = x_{u} + \frac{\xi_{u}}{2}$ and $\delta_{l} = x_{l} + \frac{\xi_{l}}{2}$.
+
+The expression can be written as:
+\begin{equation} \label{Eq_S1s1_02}
+  \begin{aligned}
+    F_{k\,u} & = -k_{u} \, \left[ \left( x_{u} - x_{b} \right) +
+                \eta_{u} \left( x_{u} - x_{b} \right)^3 \right], \\
+    F_{k\,l} & = -k_{l} \, \left[ \left( x_{l} - x_{b} \right) +
+                \eta_{l} \left( x_{l} - x_{b} \right)^3 \right], \\
+    F_{k\,b} & = -k_{b} \, \left[ \left(x_{b} - x_{0\,b} \right) +
+                \eta_{b} \left(x_{b} - x_{0\,b} \right)^3 \right], \\
+    F_{kc} & = -k_{c} \, \left[ x_{u} - x_{l} \right].
+  \end{aligned}
+\end{equation}
+The elastic parameters $(k_{u}, \, k_{l}, \, k_{b}, \, k_{c})$ are obtained as a function
+of the activation of laryngeal muscles \cite{titze_rules_2002}.
+
+\subsection{Damping forces}
+Damping forces are \cite{galindo_modeling_2017,lucero_simulations_2005}:
+\begin{equation} \label{Eq_S1s2_01}
+  \begin{aligned}
+    F_{d\,u} & = -2\zeta_{u}\sqrt{m_{u} k_{u}} \left( 1 + 150 |\delta_{u}| \right)
+                        \left( \dot{x}_{u} - \dot{x}_{b} \right), \\
+    F_{d\,l} & = -2\zeta_{l}\sqrt{m_{l} k_{l}}  \left( 1 + 150 |\delta_{l}| \right)
+                        \left( \dot{x}_{l} - \dot{x}_{b} \right), \\
+    F_{d\,b} & = -2\zeta_{b}\sqrt{m_{b} k_{b}} \left( \dot{x}_{b} \right).
+  \end{aligned}
+\end{equation}
+where $\delta_{u} = x_{u} + \frac{\xi_{u}}{2}$ and $\delta_{l} = x_{l} + \frac{\xi_{l}}{2}$.
+
+\subsection{Collision forces}
+In order to compute the reaction forces due to the collision of left/right vocal folds,
+glottis membranous area and contact area during collision are first described. 
+
+According to the TBCM, the parametric representations of the rest configuration for the cover masses are
+$r_{*}(z) = \xi_{*} \left(1 - \frac{z}{L_{g}} \right)$, $0\leq z \leq L_{g}$, and $* \in \{u,l\}$.
+Then, the phonatory configuration can be computed as follows:
+\begin{equation} \label{Eq_S1s3_01}
+  w_{*}(z) = x_{*} + \xi_{*} \left(1 - \frac{z}{L_{g}} \right).
+\end{equation}
+Thus, vocal fold collision occurs for all $z$ given that $w_{*}(z) \leq 0$.
+
+\subsubsection{Region under collision}
+In the vertical axis, the region under collision is delimited by two extreme points.
+Solving for $w_{*}(z) = 0$, one of these extreme points is computed:
+\begin{equation} \label{Eq_S1s3_02}
+  \tilde{z} = \min\left(0, \, \max\left(\frac{ x_{*} + \xi_{*} }{\xi_{*}}, \, 1\right) \right) \, L_{g}.
+\end{equation}
+The other extreme points depends on $\xi_{*}$. For the case $\xi_{*}>0$, the vertical region under
+collision is $[\tilde{z},L_{g}]$, whereas if $\xi_{*}<0$ the region is $[0,\tilde{z}]$.
+In the case $\xi_{*}=0$, the TCBM tends to the original \emph{body-cover} model \cite{story_voice_1995}.
+
+Let $\alpha_{*}$ be the portion of length of the cover masses under collision, 
+with $0 \leq \alpha_{*} \leq 1$ and $* \in \{u,l\}$. Following the definition of the collision region
+introduced above, the formulation of $\alpha_{*}$ depends on $x_{*}$ and $\xi_{*}$:
+\begin{description}
+  \item[Case $\xi_{*}=0$:] parallel bars as in the body-cover model,
+    \begin{equation}
+      \alpha_{*} = \frac{1 - \operatorname{sgn}(x_{*} )}{2}.
+    \end{equation}
+  \item[Case $\xi_{*}>0$:] triangular configuration with the lateral displacement in the posterior end,
+    \begin{equation}
+      \alpha_{*} = \min\left( \max\left(0, \, -\frac{x_{*} }{\xi_{*}} \right), \, 1 \right).
+    \end{equation}
+  \item[Case $\xi_{*}<0$:] triangular configuration with the lateral displacement in the anterior end,
+    \begin{equation}
+      \alpha_{*} = \min\left( \max\left(0, \, \frac{x_{*}+\xi_{*}  }{\xi_{*}} \right), \, 1 \right).
+    \end{equation}
+\end{description}
+
+\subsubsection{Rule for collision forces}
+Considering the definitions introduced in the previous section, 
+the resulting collision forces $F_{col\,*}$, $* \in \{u,l\}$, along the region under collision is:
+\begin{equation} \label{Eq_S1s3_04}
+  F_{col\,*} = \frac{1}{L_{g}} \int_{z_1}^{z_2} -\hat{h}_{col\,*} \left[
+                    w_{*}(z) + \hat{\eta}_{col\,*} w_{*}(z)^3 \right] \, dz,
+\end{equation}
+where $z_1$ and $z_2$ are the inferior and superior extremes of the collision region.
+Applying integration by substitution, Eq. \eqref{Eq_S1s3_04} is integrated out:
+\begin{equation} \label{Eq_S1s3_05}
+  F_{col\,*} = \frac{\hat{h}_{col\,*}}{\xi_{*}} \left[\frac{1}{2} w_{*}(z)^2 +
+                      \frac{\hat{\eta}_{col\,*}}{4} w_{*}(z)^4  \right]_{z_1}^{z_2}.
+\end{equation}
+
+Next, the different solutions are obtained:
+\begin{description}
+  \item[Case $\xi_{*} \geq 0$:]
+    Correspond to a triangular configuration with the lateral displacement in the posterior end.
+    For the case $x_{*} \leq 0$, the inferior and superior extremes are $z_1 = \tilde{z} $ and $z_2 = L_{g}$,
+    and $w_{*}(z_1) = 0$ and $w_{*}(z_2) = x_{*}$.
+    The resulting collision forces is:
+    \begin{equation}
+      \begin{aligned}
+        F_{col\,*} & = \frac{\hat{h}_{col\,*}}{\xi_{*}} \left[\frac{1}{2} x_{*}^2 +
+                         \frac{\hat{\eta}_{col\,*}}{4} x_{*}^4  \right]
+                     = - \alpha_{*} \hat{h}_{col\,*} \left[\frac{1}{2} x_{*} +
+                         \frac{\hat{\eta}_{col\,*}}{4} x_{*}^3  \right]     \\
+                   & = - \alpha_{*} \hat{h}_{col\,*} \left\{
+                            \left( \delta_{*} - (1 - \alpha_{*}) \frac{\xi_{*}}{2} \right)
+                        + \hat{\eta}_{col\,*} \left( \delta_{*} - (1 - \alpha_{*}) \frac{\xi_{*}}{2} \right) 
+                        ^{\phantom{2}} \right. \\
+                   & \hspace{3cm}   \left.  \left[
+                            \left( \delta_{*} - (1 - \alpha_{*}) \frac{\xi_{*}}{2} \right)^2 + 
+                            \left( \alpha_{*} \frac{\xi_{*}}{2} \right)^2  \right] \right\},
+      \end{aligned}
+    \end{equation}
+    where $\delta_{*} = x_{*} + \frac{\xi_{*}}{2}$.
+
+  \item[Case $\xi_{*} < 0$:]
+    Correspond to a triangular configuration with the lateral displacement in the anterior end.
+    For the case $x_{*} > 0$, the inferior and superior extremes are $z_1 = 0 $ and $z_2 = \tilde{z}$,
+    and $w_{*}(z_1) = x_{*}+\xi_{*}$ and $w_{*}(z_2) = 0$.
+    The resulting collision forces is:
+    
+    \begin{equation}
+      \begin{aligned}
+        F_{col\,*} & = \frac{\hat{h}_{col\,*}}{\xi_{*}} \left[\frac{-1}{2} (x_{*}+\xi_{*})^2 -
+                         \frac{\hat{\eta}_{col\,*}}{4} (x_{*}+\xi_{*})^4  \right]     \\
+                   & = - \alpha_{*} \hat{h}_{col\,*} \left[\frac{1}{2} (x_{*}+\xi_{*}) +
+                         \frac{\hat{\eta}_{col\,*}}{4} (x_{*}+\xi_{*})^3  \right]     \\
+                   & = - \alpha_{*} \hat{h}_{col\,*} \left\{
+                            \left( \delta_{*} - (1 - \alpha_{*}) \frac{(-\xi_{*})}{2} \right)
+                        + \hat{\eta}_{col\,*} \left( \delta_{*} - (1 - \alpha_{*}) \frac{(-\xi_{*})}{2} \right)
+                        ^{\phantom{2}} \right. \\
+                   & \hspace{3cm}   \left.  \left[
+                            \left( \delta_{*} - (1 - \alpha_{*}) \frac{(-\xi_{*})}{2} \right)^2 + 
+                            \left( \alpha_{*} \frac{\xi_{*}}{2} \right)^2  \right] \right\},
+      \end{aligned}
+    \end{equation}
+    where $\delta_{*} = x_{*} + \frac{\xi_{*}}{2}$.
+\end{description}
+
+
+\section{Membranous glottal area}
+The membranous glottal area $A_m$ is delimited for the triangular posture of the glottal folds, 
+from the posterior vocal processes to the anterior ends. This parameter can be computed as follows:
+\begin{equation} \label{Eq_S2s0_01}
+  A_m = 2 \begin{cases}
+            (1 - \alpha_{*}) L_{g} \left(\delta_{*} + \alpha_{*} \frac{\xi_{*}}{2} \right),
+                & 0 \leq \xi_{*}, \\
+            (1 - \alpha_{*}) L_{g} \left(\delta_{*} + \alpha_{*} \frac{(-\xi_{*})}{2} \right),
+                & \xi_{*} <0,
+          \end{cases}
+\end{equation}
+where $\delta_{*} = x_{*} + \frac{\xi_{*}}{2}$.
+Taking into account the definition of $\alpha_{*}$, membranous area formulation for the original
+body-cover model is obtained through Eq. \eqref{Eq_S2s0_01} in the case $\xi_{*}=0$.
+
+
+\newpage
+
+% Bibliography
+\bibliographystyle{abbrv} 
+\bibliography{references}
+
+
+
+\end{document}

@@ -1,0 +1,31 @@
+\begin{thebibliography}{1}
+
+\bibitem{galindo_modeling_2017}
+G.~E. Galindo, S.~D. Peterson, B.~D. Erath, C.~Castro, R.~E. Hillman, and
+  M.~Za{\~{n}}artu.
+\newblock {Modeling the Pathophysiology of Phonotraumatic Vocal Hyperfunction
+  With a Triangular Glottal Model of the Vocal Folds}.
+\newblock {\em Journal of Speech, Language, and Hearing Research},
+  60(9):2452--2471, sep 2017.
+
+\bibitem{lucero_simulations_2005}
+J.~C. Lucero and L.~L. Koenig.
+\newblock {Simulations of temporal patterns of oral airflow in men and women
+  using a two-mass model of the vocal folds under dynamic control}.
+\newblock {\em The Journal of the Acoustical Society of America},
+  117(3):1362--1372, mar 2005.
+
+\bibitem{story_voice_1995}
+B.~H. Story and I.~R. Titze.
+\newblock {Voice simulation with a body-cover model of the vocal folds}.
+\newblock {\em The Journal of the Acoustical Society of America},
+  97(2):1249--1260, feb 1995.
+
+\bibitem{titze_rules_2002}
+I.~R. Titze and B.~H. Story.
+\newblock {Rules for controlling low-dimensional vocal fold models with muscle
+  activation}.
+\newblock {\em The Journal of the Acoustical Society of America},
+  112(3):1064--1076, sep 2002.
+
+\end{thebibliography}
