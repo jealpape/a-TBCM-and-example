@@ -1,0 +1,58 @@
+!	Fourth order Runge-Kutte routine.
+! 	Adapted from Titze's Posture.for to ADPL by
+!		Eric Hunter 2/15/2001
+!
+! USAGE:
+!arg1 = number of equations to solve
+!arg2 = status (used to be 'm')
+!
+! REQUIRES THE FOLLOWING TO BE ALREADY INITIALIZED
+!F_	- a variable representing the equation to be solved
+!dF_	- the derivative of F_
+!PHI_	- RK4 variables initialized before call
+!Y0_	- RK4 variables initialized before call
+!Istat_ - RK4 var initialize before call, ending condition
+!
+
+!/nopr	! no output to output window
+
+*if,arg2,eq,1,then
+	Istat_=1
+*elseif,arg2,eq,2,then
+	Istat_=1
+	*do,KKi_,1,arg1,1
+		Y0_(KKi_)=F_(KKi_)
+		PHI_(KKi_)=dF_(KKi_)
+		F_(KKi_)=Y0_(KKi_)+0.5*TAU_*dF_(KKi_)
+	*enddo	
+	TIME1_=TIME1_+0.5*TAU_
+*elseif,arg2,eq,3,then
+	Istat_=1
+	*do,KKi_,1,arg1,1
+		PHI_(KKi_)=PHI_(KKi_)+2.*dF_(KKi_)
+		F_(KKi_)=Y0_(KKi_)+0.5*TAU_*dF_(KKi_)
+	*enddo
+*elseif,arg2,eq,4,then
+	Istat_=1
+	*do,KKi_,1,arg1,1
+		PHI_(KKi_)=PHI_(KKi_)+2.*dF_(KKi_)
+		F_(KKi_)=Y0_(KKi_)+TAU_*dF_(KKi_)	
+	*enddo			
+	TIME1_=TIME1_+0.5*TAU_
+*elseif,arg2,eq,5,then
+	Istat_=0
+	*do,KKi_,1,arg1,1
+		F_(KKi_)=Y0_(KKi_)+(PHI_(KKi_)+dF_(KKi_))*TAU_/6
+	*enddo
+*endif
+
+!/gopr	! resume output to output window
+
+
+
+
+
+
+
+
+

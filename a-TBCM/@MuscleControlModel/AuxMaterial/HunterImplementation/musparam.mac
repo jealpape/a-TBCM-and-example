@@ -1,0 +1,79 @@
+!	musparam.mac
+!==============================================================================
+!Purpose:     	Ansys APDL file written in support of a dissertation submitted
+!             	in partial fulfillment of the requirements of the degree of a 
+!		PhD of Speech Science in the Department of Speech Pathology
+!		and Audiology;	 University of Iowa
+!
+!Description: 	! macro that assigns Kelvin Model parameters values from
+!		!  a specific tissue type
+!
+!Requiremnt:  	This requires that the muscle data is already present in memory
+!		with the arrays used below
+!
+!RETURNS:
+! 		kelvin parameters:
+!		[Sig_o Sig_2 Eps_1 Eps_2 B Tp Ts Sig_m Eps_m b dEps_m Ti1 Ti2]
+!		direction cosines
+!		[l_ m_ n_]
+!		dimensions
+!		[area_ length_
+!		
+!Macro File:  	musparam.mac
+!Ansys Mode:  	Interactive or Batch 
+!
+
+!Written by:  	Eric J Hunter	3/7/01
+!
+!Revision:     	1.1
+!Last Revised: 	24 April 2001
+!
+!
+!All user defined commands and parameters end with an underscore
+!For all units are in MKS
+!
+!==============================================================================
+
+
+
+*if,arg1,eq,0,then
+	*ask,musN_,What tissue properties would you like to assign?,1
+*else
+	musN_=arg1
+*endif
+
+!/nopr	! no output to output window
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!![Sig_o Sig_2 Eps_1 Eps_2 B Tp Ts Sig_m Eps_m b dEps_m Ti1 Ti2]
+!!   1	   2     3     4   5  6  7   8     9   10  11    12  13 
+sig0_ 	=MuscKV_( 1,musN_) 	!! Passive stress (Pa) at EPSy(1)=0
+sig2_ 	=MuscKV_( 2,musN_) 	!! Scaling of exponential stress (50 kPa)
+eps1_ 	=MuscKV_( 3,musN_) 	!! Strain at zero stress
+eps2_ 	=MuscKV_( 4,musN_) 	!! Strain at exponential stress
+B_   	=MuscKV_( 5,musN_) 	!! Exponential strain constant
+Tp_  	=MuscKV_( 6,musN_) 	!! Parallel contraction time (sec)
+Ts_  	=MuscKV_( 7,musN_) 	!! Series contraction time (sec)
+sigm_	=MuscKV_( 8,musN_) 	!! Maximum active stress (Pa)
+epsm_ 	=MuscKV_( 9,musN_) 	!! Strain at Maximum active Stress
+Cs_ 	=MuscKV_(10,musN_) 	!! Coef. for active stress strain curve
+depsm_	=MuscKV_(11,musN_) 	!! Maximum strain rate (1/sec)
+Ti1_ 	=MuscKV_(12,musN_) 	!! parameters for Ti = 0.02+0.1*EPSy(step)  
+Ti2_ 	=MuscKV_(13,musN_) 	! ...resulting in Ti = Ti1+Ti2*EPSy(step);
+
+
+l_=MuscDC_(1,musN_)		!! first direction cosine
+m_=MuscDC_(2,musN_)		!! second direction cosine
+n_=MuscDC_(3,musN_)		!! third direction cosine
+
+
+area_=MuscCS_(musN_)		!! cross section area
+length_=MuscLN_(musN_)		!! length of muscle
+
+
+
+! Clean up all variables
+! $ allows multiple commands on one line
+
+!/gopr	! resume output to output window
+

@@ -1,0 +1,18 @@
+Kelvin_p.mac-		This function represents the solution of the differential equations using a fourth order runge-kutte method on Equations 21 and 22 from the paper E. J. Hunter, I. R. Titze, and F. Alipour, (2004) A three-dimensional model of vocal fold adduction/abduction. J.Acoust.Soc.Am. 115 (4):1747-1759
+
+This function was based on FORTRAN code written by Ingo Titze in which the two dimensional posturing of the aryntenoid is calculated for a speech simulator.  Convertion, translation and modifications from FORTRAN to APDL by Eric Hunter, in 2001.  Description: This function calculates the stress to apply to a node for nonlinear (contractile and/or passive) material	given time step, time, strain, strain history, and activation percentage.  All other muscle constants from Kelvin Model must already be defined in memory.  USAGE: Kelvin variables tau ,time, eps,deps, atv,sigT,dsigT,sigI,dsigI are respectivaly assigned to arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 when calling the function.  Upon completion, the fuction returns the variables: SigI_ (internal stress), SigT_ (total stress), dSigI_ (internal stress), dSigT_ (total stress), E_ (tanjent youngs modulus), Time1_	(time after runga-kutta), and SigP_ (passive stress).
+
+This function requires the following scripts to be previously executed: jun23_MuscData.inp and musparam.mac.
+This function requires the following functions to be available: active.mac, passive.mac, maximum.mac, rkfor.mac.
+
+jun23_MuscData.inp-	An input file contains muscle information for all the different muscles used in the model. This can be run without other initializations.  all variables are self contained.  The script returns three arrays that contain Kelvin Model parameters, direction cosines, cross sectional area, and muscle length.  
+
+musparam.mac-		This is a macro that assigns Kelvin Model parameters values and direction cosines from a specific tissue type.  This requires that the muscle data is already present in memory (as assigned by 'jun23_MuscData.inp').
+
+active.mac-		This function calculates the active axial stress of a muscle.  It represents Equation 18,19, & 20 from the paper E. J. Hunter, I. R. Titze, and F. Alipour, (2004) A three-dimensional model of vocal fold adduction/abduction. J.Acoust.Soc.Am. 115 (4):1747-1759.  Usage: equation variables a ,eps ,sigm, bb,epm ,depm,deps are respectivly assigned on function call as arg1,arg2,arg3,arg4,arg5,arg6,arg7 (see line 99 in kelvin_p.mac).  Upon completion, the function returns the variable tmp_, the total predicted active axial stess in the muscle.
+
+passive.mac-		This function calculates the passive nonlinear axial stress within elongated tissue. It represents Equation 13 and 14 from the paper E. J. Hunter, I. R. Titze, and F. Alipour, (2004) A three-dimensional model of vocal fold adduction/abduction. J.Acoust.Soc.Am. 115 (4):1747-1759.  Usage: equation variables sg0, sg2,epsy, ep1, ep2,   B, are respectivly assigned on function call as arg1,arg2,arg3,arg4,arg5,arg6 (see line 112 in kelvin_p.mac).  Upon completion, the function returns the variable tmp_, the total predicted axial passive stess in the muscle. 
+
+maximum.mac-		This is a generic APDL function that returns the maximum of two given variables.  
+
+rkfor.mac-		This is a foruth order Runge-Kutte routine adapted from Ingo Titze's FORTRAN version.  

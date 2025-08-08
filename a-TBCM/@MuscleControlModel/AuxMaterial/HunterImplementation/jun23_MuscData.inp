@@ -1,0 +1,215 @@
+!	MuscData.inp
+!==============================================================================
+!Purpose:     	Ansys APDL file written in support of a dissertation submitted
+!             	in partial fulfillment of the requirements of the degree of a 
+!		PhD of Speech Science in the Department of Speech Pathology
+!		and Audiology;	 University of Iowa
+!
+!Description: 	! input file contains muscle information for all the different
+!		! muscles used in the model. 
+!
+!RETURNS:	Three arrays that contain Kelvin Model parameters, direction
+!		cosines, cross sectional area, and muscle length
+!
+!Macro File:  	MuscData.inp
+!Ansys Mode:  	Interactive or Batch 
+!
+!Written by:  	Eric J Hunter	3/7/01
+!
+!Revision:     	1.2
+!Last Revised: 	24 April 2001
+!
+!
+!All user defined commands and parameters end with an underscore
+!For all units are in MKS
+!
+!==============================================================================
+
+
+TAtot_=0
+CTtot_=0
+!/nopr	! no output to output window
+
+MuscKV_=
+MuscDC_=
+MuscCS_=
+MuscLn_=
+MuscKP_=
+
+tmp_=100
+*DIM,MuscKV_,ARRAY,13,tmp_	! Kelvin Model 13 parameters
+*DIM,MuscDC_,ARRAY,3,tmp_	! Muscle Direction Cosines
+*DIM,MuscCS_,ARRAY,tmp_		! Muscle Cross-Sectional Areas
+*DIM,MuscLn_,ARRAY,tmp_		! Muscle Average Length
+*DIM,MuscKP_,ARRAY,tmp_		! KPs of innervention for specific muscles
+
+!!!!!!!!!!!!!!!
+!! IA				
+MuscKV_(1,1)=2000.,55000.,-0.5,0.2,4.5,0.05		! 31	TA #1
+MuscKV_(7,1)=0.044,105000,0.4,1.07,6.,0.01,0.05
+!MuscKV_( 1,1)=1271,6078,-0.5,-0.0265,6.29,0.09254		! 01 	IA #1
+!MuscKV_( 7,1)=0.05262,105000,0.4,2.25,5,0.005,0.05
+MuscDC_(1,1)=-0.692,-0.627,0.358 
+MuscCS_(1)=12.15/1E6	! canine; SD 2+
+MuscLN_(1)=9.3/1E3	! canine; SD 1.25
+MuscKP_(1)=n_ia_	! POSTERIOR AND MEDIAL OF MUS PROS
+!!
+!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!
+!! LCA
+MuscKV_(1,11)=2000.,55000.,-0.5,0.2,4.5,0.05		! 31	TA #1
+MuscKV_(7,11)=0.044,105000,0.4,1.07,6.,0.01,0.05
+!MuscKV_(1,11)=827.4,622.4,-0.5,0.0416,17.1,0.1199		! 11	LCA #1
+!MuscKV_(1,11)=751,329,-0.5,-0.02307,14.908,0.09931		! 11	LCA #1
+!MuscKV_(7,11)=0.05429,22760,0.61,2.076,2.25,0.005,0.05	
+MuscDC_(1,11)=-0.158,0.902,-0.403 
+MuscCS_(11)=21.2/1E6	! canine; SD 5
+MuscLN_(11)=14.42/1E3	! canine; SD 0.8
+MuscKP_(11)=n_lca_	! MUScular PROCcess
+!!
+!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!
+!! PCA
+MuscKV_(1,21)=2000.,55000.,-0.5,0.2,4.5,0.05		! 31	TA #1
+MuscKV_(7,21)=0.044,105000,0.4,1.07,6.,0.01,0.05
+!MuscKV_(1,21)=1551.,6019,-0.5,-0.03999,10.842,.08443		! 21	PCA #1 average
+!MuscKV_(7,21)=0.04843,105000.,0.4,1.07,6.0,0.005,0.05						
+MuscDC_(1,21)=-0.666,-0.228,-0.710 
+MuscCS_(21)=32.88/1E6	! canine; SD 6.16
+MuscLN_(21)=15.165/1E3	! canine; SD 1.036
+MuscKP_(21)=n_pca_	! POSTERIOR AND MEDIAL OF MUS PROS
+!!
+MuscKV_(1,22)=1551.,6019,-0.5,-0.03999,10.842,.08443		! 22	PCAo #2
+MuscKV_(7,22)=0.04843,105000.,0.4,1.07,6.0,0.005,0.05
+MuscDC_(1,22)=-0.759,-0.298,-0.579 
+MuscCS_(22)=22.23/1E6	! canine; SD 6.41
+MuscLN_(22)=14.932/1E3	! canine; SD 0.967
+MuscKP_(22)=n_pca_	! POSTERIOR AND MEDIAL OF MUS PROS
+!!
+MuscKV_(1,25)=818.,28.,-0.5,-0.182,16.10,0.1154			! 25	PCAv #3
+MuscKV_(7,25)=0.0612,30940,0.1675,7.5796,2.25,0.005,0.05
+MuscDC_(1,25)=-0.413,-0.063,0.909 
+MuscCS_(23)=10.64/1E6	! canine; SD 2.77
+MuscLN_(23)=15.863/1E3	! canine; SD 1.604
+MuscKP_(23)=n_pca_	! POSTERIOR AND MEDIAL OF MUS PROS
+!!
+!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!
+!! TA
+MuscKV_(1,31)=2000.,55000.,-0.5,0.2,4.5,0.05		! 31	TA #1
+MuscKV_(7,31)=0.044,105000,0.4,1.07,6.,0.01,0.05
+MuscDC_(1,31)=.015, .990,-.00123 
+MuscCS_(31)=40.9/1E6
+!! human=40.9, SD=7.5mm^2, range=29.4-51.7
+!! canin=63.8, SD=9.0mm^2, range=5.39-71.4
+MuscLN_(31)=18.3/1E3
+!! human=18.3, SD=2.0mm^2, range=15.3-20.0
+!! canin=21.9, SD=1.1mm^2, range=20.7-22.8
+MuscKP_(31)=k_tav_	! POSTERIOR AND MEDIAL OF MUS PROS
+!!
+
+
+MuscKV_(1,32)=2000.,55000.,-0.5,0.2,4.5,0.05		! 31	TA #1
+MuscKV_(7,32)=0.044,105000,0.4,1.07,6.,0.01,0.05
+MuscDC_(1,32)=.015, .990,-.00123 
+MuscCS_(32)=40.9/1E6/2
+MuscLN_(32)=18.3/1E3
+MuscKP_(32)=k_tav_	! POSTERIOR AND MEDIAL OF MUS PROS
+!!
+
+
+MuscKV_(1,33)=2000.,55000.,-0.5,0.2,4.5,0.05		! 31	TA #1
+MuscKV_(7,33)=0.044,105000,0.4,1.07,6.,0.01,0.05
+!MuscKV_(1,33)=770.,256.,-0.5,-0.056,15.45,0.12		! 33	TAM #3
+!MuscKV_(7,33)=0.07,30940,0.1675,7.5796,2.25,0.01,0.1
+MuscDC_(1,33)=.015, .990,-.00123 
+MuscCS_(33)=40.9/1E6/2
+MuscLN_(33)=18.3/1E3
+MuscKP_(33)=k_tam_	! POSTERIOR AND MEDIAL OF MUS PROS
+!!
+!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!
+!! CT
+!MuscKV_( 1,41)=1333,7099,-0.5,0.00439,5.947,0.09038		! 01 	IA #1
+!MuscKV_( 7,41)=0.05058,105000,0.4,2.25,5,0.01,0.05
+
+
+MuscKV_(1,41)=770.,256.,-0.5,-0.056,15.45,0.12		! 41	CT #1
+MuscKV_(7,41)=0.07,30940,0.1675,7.5796,2.25,0.01,0.1
+MuscCS_(41)=73.8/1E6
+!! human=73.8, SD=7.4mm^2, range=64.2-80.7
+!! canin=105.3,SD=11.6mm^2, range=92.7-115.4
+MuscLN_(41)=13.8/1E3
+!! human=13.8, SD=1.0mm^2, range=12.7-15.1
+!! canin=15.2, SD=0.4mm^2, range=14.9-15.6
+!!
+MuscKV_(1,42)=770.,256.,-0.5,-0.056,15.45,0.12		! 42	CTR #1
+MuscKV_(7,42)=0.07,30940,0.1675,7.5796,2.25,0.01,0.1
+MuscCS_(42)=34.5/1E6
+!! human=34.5, SD=7.5mm^2, range=26.0-48.0
+!! canin=38.7, SD=7.0mm^2, range=31.4-45.3
+MuscLN_(42)=11.5/1E3
+!! human=11.5, SD=1.7mm^2, range=9.4-14.30
+!! canin=16.4, SD=0.4mm^2, range=14.9-15.6
+!!
+MuscKV_(1,43)=770.,256.,-0.5,-0.056,15.45,0.12		! 43	CTO #1
+MuscKV_(7,43)=0.07,30940,0.1675,7.5796,2.25,0.0495,0.0237
+MuscCS_(43)=39.3/1E6
+!! human=39.3, SD=8.1mm^2, range=30.4-50.6
+!! canin=66.6, SD=4.6mm^2, range=61.3-70.1
+MuscLN_(43)=16.0/1E3
+!! human=16.0, SD=0.9mm^2, range=14.4-16.8
+!! canin=14.4, SD=0.9mm^2, range=13.4-15.2
+!!
+!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!
+!! Ligement
+MuscKV_(1,51)=13000.,45000.,-0.5,0.2,6.8,0.08		! 51	Lig #1
+MuscKV_(7,51)=0.07,1,1,1,1,1,1
+MuscDC_(1,51)=LigDC_(1,1),LigDC_(1,2),LigDC_(1,3) 
+MuscCS_(51)=5.342/1E6
+MuscLN_(51)=18.3/1E3
+MuscKP_(51)=k_lig_	! POSTERIOR AND MEDIAL OF MUS PROS
+
+
+!!!!!!!!!!!!!!!
+!! TEST MUSCLE
+MuscKV_(1,100)=1000.,1000.,-0.5,0.0,10,0.1		! 100	TA #1
+MuscKV_(7,100)=0.07,30000,0.16,7.5,2.25,0.01,0.1
+MuscDC_(1,100)=1, 0,0 
+MuscCS_(100)=10/1E6
+MuscLN_(100)=10/1E3
+!MuscKP_(100)=TAvKPi_(1)	! POSTERIOR AND MEDIAL OF MUS PROS
+
+
+!LigDC_(1,1)=-0.086,-0.086,-0.086,-0.086,	!	X
+!LigDC_(1,2)= 0.985,0.985,0.985,0.985,		!	Y
+!LigDC_(1,3)=-0.005,-0.005,-0.005,-0.005,	!	z
+!TAmDC_(1,1)= 0.116,0.116,0.116,0.116,		!	X
+!TAmDC_(1,2)= 0.985,0.985,0.985,0.985,		!	Y
+!TAmDC_(1,3)=-0.036,-0.036,-0.036,-0.036,	!	Z
+
+!/gopr	! resume output to output window
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!![Sig_o Sig_2 Eps_1 Eps_2 B Tp Ts Sig_m Eps_m b dEps_m Ti1 Ti2]
+!!   1	   2     3     4   5  6  7   8     9   10  11    12  13 
+!sig0_ 	=MuscKV_( 1,musN_) 	!! Passive stress (Pa) at EPSy(1)=0
+!sig2_ 	=MuscKV_( 2,musN_) 	!! Scaling of exponential stress (50 kPa)
+!eps1_ 	=MuscKV_( 3,musN_) 	!! Strain at zero stress
+!eps2_ 	=MuscKV_( 4,musN_) 	!! Strain at exponential stress
+!B_   	=MuscKV_( 5,musN_) 	!! Exponential strain constant
+!Tp_  	=MuscKV_( 6,musN_) 	!! Parallel contraction time (sec)
+!Ts_  	=MuscKV_( 7,musN_) 	!! Series contraction time (sec)
+!sigm_	=MuscKV_( 8,musN_) 	!! Maximum active stress (Pa)
+!epsm_ 	=MuscKV_( 9,musN_) 	!! Strain at Maximum active Stress
+!Cs_ 	=MuscKV_(10,musN_) 	!! Coef. for active stress strain curve
+!depsm_	=MuscKV_(11,musN_) 	!! Maximum strain rate (1/sec)
+!Ti1_ 	=MuscKV_(12,musN_) 	!! parameters for Ti = 0.02+0.1*EPSy(step)  
+!Ti2_ 	=MuscKV_(13,musN_) 	! ...resulting in Ti = Ti1+Ti2*EPSy(step);

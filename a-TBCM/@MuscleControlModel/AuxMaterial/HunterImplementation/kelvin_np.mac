@@ -1,0 +1,345 @@
+!	kelvin2.mac
+!==============================================================================
+!Purpose:     	Ansys APDL file written in support of a dissertation submitted
+!             	in partial fulfillment of the requirements of the degree of a 
+!		PhD of Speech Science in the Department of Speech Pathology
+!		and Audiology;	 University of Iowa
+!
+! This function represents the solution of the differential equations
+! using a fourth order runge-kutte method on Equations 21 and 22 from the paper...
+! E. J. Hunter, I. R. Titze, and F. Alipour, (2004) A three-dimensional 
+! model of vocal fold adduction/abduction. J.Acoust.Soc.Am. 115 (4):1747-1759
+! 
+! This function was taken from Ingo Titze's 'posture.for' for 'speak'.
+! Convertion to APDL with some modifications by eric hunter
+!
+!Description: 	Calculates the stress to apply to a node for nonlinear material
+!		given time step, time, strain, strain history, and activation
+!		All other muscle constants from Kelvin Model must
+!		also be provided.! muscles used in the model. 
+!		The stress is adjusted by the amount of stress already in the mucosa 
+! 		of the finite elements.
+!
+!
+!USAGE:		tau ,time, eps,deps, atv,sigT,dsigT,sigI,dsigI,
+!		arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9
+!
+!RETURNS:	!SigI_	-internal stress
+!		!SigT_	-total stress
+!		!dSigI_	-internal stress
+!		!dSigT_	-total stress
+!		!E_	-youngs modulus from sig_p
+!		!Time1_	-time after runga-kutta
+!		!SigP_	-passive stress
+!
+!
+!THE FOLLOWING VARIABLES ARE ASSUMED TO BE, WITH THESE NAMES
+!
+!sig0_ 	=Muscle_(musN_, 1) 	!! Passive stress (Pa) at EPSy(1)=0
+!sig2_ 	=Muscle_(musN_, 2) 	!! Scaling of exponential stress (50 kPa)
+!eps1_ 	=Muscle_(musN_, 3) 	!! Strain at zero stress
+!eps2_ 	=Muscle_(musN_, 4) 	!! Strain at exponential stress
+!B_   	=Muscle_(musN_, 5) 	!! Exponential strain constant
+!Tp_  	=Muscle_(musN_, 6) 	!! Parallel contraction time (sec)
+!Ts_  	=Muscle_(musN_, 7) 	!! Series contraction time (sec)
+!sigm_	=Muscle_(musN_, 8) 	!! Maximum active stress (Pa)
+!epsm_ 	=Muscle_(musN_, 9) 	!! Strain at Maximum active Stress
+!Cs_  	=Muscle_(musN_,10) 	!! Coef. for active stress strain curve
+!depsm_	=Muscle_(musN_,11) 	!! Maximum strain rate (1/sec)
+!Ti1_ 	=Muscle_(musN_,12) 	!! parameters for Ti = 0.02+0.1*EPSy(step)  
+!Ti2_ 	=Muscle_(musN_,13) 	! ...resulting in Ti = Ti1+Ti2*EPSy(step);
+!area_
+!
+!Functions Required:	active, passive, rkfor, maximum
+!
+!Macro File:  	kelvin.mac
+!Ansys Mode:  	Interactive or Batch 
+!
+!Written by:  	Eric J Hunter	3/7/01
+!
+!Revision:     	1.2
+!Last Revised: 	21 July 2001
+!
+!
+!All user defined commands and parameters end with an underscore
+!For all units are in MKS
+!
+!==============================================================================
+
+!!!!!!!!!!!!!!!
+!! Setup
+!F_= $ dF_=
+!*DIM,F_,ARRAY,2
+!*DIM,dF_,ARRAY,2
+!F_(1)=0,0
+!dF_(1)=0,0
+!!!
+!TIME1_=Time_
+!TAU_=dT_
+!!
+!!!!!!!!!!!!!!!
+! use the above if stand alone, or below if used as function
+
+!!!!!!!!!!!!!!!
+!! Setup
+F_= $ dF_=
+*DIM,F_,ARRAY,2
+*DIM,dF_,ARRAY,2
+F_(1)=arg6,arg8
+dF_(1)=arg7,arg9
+!!
+TIME1_=arg2
+TAU_=arg1
+!!
+!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!
+!! caluculate active stress 'siga_' using macro 'active'
+!!	Active returns active stress in 'tmp_'
+!! 	Active needs 'arg5,arg3,sigm_,Cs,epsm_,depsm_,arg4'
+*if,arg5,gt,0,then
+	!active,FibAtv_,FIB_EPS_(i_,j_,k_),sigm_,Cs_,epsm_,depsm_,0
+	active,arg5,arg3,sigm_,Cs_,epsm_,depsm_,arg4	
+ 	siga_	=tmp_					
+!writer,arg5
+!writer,siga_
+*else 
+	siga_	=0
+*endif
+
+!!
+!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!
+!! caluculate passive stress 'sigp_' using macro 'passive'
+!!	Passive returns passive stress in 'tmp_' and E in tmpE_
+!! 	Passive needs 'sig0_,sig2_,arg3,eps1_,eps2_,B_)
+!passive,sig0_,sig2_,FIB_EPS_(i_,j_,k_),eps1_,eps2_,B_
+passive,sig0_,sig2_,arg3,eps1_,eps2_,B_
+sigp_	=0	!	tmp_
+E_	=tmpE_
+!!
+!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!
+!! calculate strain-dep. act. time
+!!	Maximum returns maximum of two variables in tmp_
+maximum,Ti1_,Ti1_+Ti2_*arg3
+Ti_	=tmp_
+!writer,Ti1_
+!writer,Ti2_
+!writer,Ti_
+!!
+!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!
+!! Runge-Kutta 4 routine...
+!!
+!! F_ is force vector of dimension N_
+!! dF_ is derivative of force vector
+!!
+*DIM,PHI_,ARRAY,5	! for RKfor
+*DIM,Y0_,ARRAY,5	! for RKfor
+Istat_=1             	! initialize status of RK4.
+!! 
+*do,M_,1,5,1,   !! keep running the loop until Istat==0.
+	*if,Istat_,eq,0,then
+		*exit
+	*endif
+
+   	rkfor,2,M_	! what it needs (N,F,DF,time,tau)
+!	writer,Ti_
+   	*if,Ti_,gt,0,then
+	 	dF_(2)=(siga_-F_(2))/Ti_		!internal active stress	
+!		writer,dF_(2)
+!		writer,F_(2)
+	*endif
+ 	tmp_=sigp_+Tp_*E_*arg4+F_(2)
+ 	!tmp_=area_*(sigp_+Tp_*E_*arg4+F_(2))
+ 	dF_(1)=(-F_(1)+tmp_)/Ts_	!differential force eq.
+*enddo
+!!
+!!  end runge-kutta 
+!!!!!!!!!!!!!!!
+
+!writer,dF_(2)
+!writer,F_(2)
+
+!!!!!!!!!!!!!!!
+!! Return Sress
+SigT_=F_(1)	!total stress
+SigI_=F_(2)	!internal active stress
+dSigT_=dF_(1)	!total stress
+dSigI_=dF_(2)	!internal active stress
+SigP_=sigp_	!passive stress
+!!
+!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!
+!! Clean up all variables
+!! $ allows multiple commands on one line
+PHI_ = $ Y0_ = $ tmp_=
+siga_= $ Ti_= $ F_  = $ dF_=
+!!
+!!!!!!!!!!!!!!!
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! original routine information
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!
+!!
+!!  Subroutine 'posture' solves the differential equations of motion for
+!!  laryngeal posturing.  Specifically, it solves the dynamics of cricothyroid
+!!  and cricoarytenoid joint movement (rotation and translation) in the control
+!!  of vocal fold length and adduction. The program also incorporates sensory
+!!  feedback for instability (tremor or vibrato) in vocal fold muscles. The
+!!  outputs are the dynamic vocal fold length and the position of the arytenoid 
+!!  cartilage. All dimensioned quantities are expressed in the MKS system.
+!!***************************************************************************
+!!  Input variables used in the calling sequence
+!!    dt1=the sampling interval for posturing
+!!    tim1=the simulation time, updated by Runge-Kutta in steps dt1
+!!    a0lc=input muscle activity of LCA, prior to feedback
+!!    a0ia=input muscle activity of IA , prior to feedback
+!!    a0pc=input muscle activity of PCA, prior to feedback
+!!    a0ct=input muscle activity of CT , prior to feedback
+!!    a0ta=input muscle activity of TA , prior to feedback
+!!    len0=vocal fold in situ rest lenth (no muscle contraction)
+!!  Output variables used in the calling sequence
+!!    eps=vocal fold strain
+!!    sigmus=longitudinal stress in muscle
+!!    siglig=longitudinal stress in ligament
+!!    sigmuc=longitudinal stress in mucosa
+!!    Emu=tangent Young's modulus for muscle
+!!    Elg=tangent Young's modulus for ligament
+!!    Emc=tangent Young's modulus for mucosa
+!!    xi_ac= x-displacements  of cricoarytenoid joints (CAJ)
+!!    psi_ac=y-displacement   of cricoarytenoid joint  (CAJ)
+!!    th_ac=counterclockwise angular displacements of CAJ
+!
+!!  Variables used for Runge-Kutta solution, 22 first-order equations
+!!    f( 1)=force in the LCA muscle
+!!    f( 2)=force in the IA  muscle
+!!    f( 3)=force in the PCA muscle
+!!    f( 4)=force in the CT  muscle
+!!    f( 5)=force in the TA  muscle
+!!    f( 6)=force in the vocal ligament
+!!    f( 7)=force in the vocal fold mucosa
+!!    f( 8)=active stress in the LCA muscle
+!!    f( 9)=active stress in the IA  muscle
+!!    f(10)=active stress in the PCA muscle
+!!    f(11)=active stress in the CT  muscle
+!!    f(12)=active stress in the TA  muscle
+!!    f(13)=rotational component of vocal fold strain
+!!    f(14)=rotational component of vocal fold strain rate
+!!    f(15)=translational component of vocal fold strain
+!!    f(16)=translational component of vocal fold strain rate
+!!    f(17)=xia, translational x-displacement of arytenoid cartilage
+!!    f(18)=derivative of xia
+!!    f(19)=psa, translational y-displacement of arytenoid cartilage
+!!    f(20)=derivative of psa
+!!    f(21)=tha, rotational displacement of arytenoid cartilage
+!!    f(22)=derivative of tha
+!!    df(1),df(2)......df(22)=the derivatives of all the above
+!
+!!  Variables used internally only
+!!    act0(1,...5)=unmodulated muscle activities, before feedback
+!!    act (1,...5)=  modulated muscle activities, after  feedback
+!!    gain(1,...5)=reflex gains in muscles
+!!    areac(1,..7)=cross sectional areas of the muscles, lig. and mucosa
+!
+!!	subroutine posture(tim1,dt1,a0lc,a0ia,a0pc,a0ct,a0ta,len0,
+!!     &   eps,xi_ac,psi_ac,th_ac,sigmus,siglig,sigmuc,Emu,Elg,Emc,
+!!     &   ct_activ,ct_force,ta_activ,ta_force,eps_ct)	!***QQQ***
+!!  Declaration of arrays and real variables with integer type names
+!!	double precision f(22),df(22)			!runge-kutta variables
+!!	real*4 actr(5,10000)				!delayed reflex activity
+!!	real*4 tn(5),ta(5),ts(7),tp(7)			!time constants
+!!	real*4 siga(5),sigm(5),sig0(7),sig2(7),sigp(7)	!stresses
+!!	real*4 E(7)					!tangent Young's moduli
+!!	real*4 ep(7),epp(7),dep(7),epm(5),depm(5),ep1(7),ep2(7)
+!!	real*4 Cm(5),Ce(7)
+!!	real*4 ka,kx,ky					!rot. and trans. stiff.
+!!	real*4 areac(7),act(5),act0(5),gain(5)
+!!	real*4 Ia,Ma					!inertia and mass, AC
+!!	real*4 kr,kt					!rot. and trans. stiff.
+!!	real*4 It,Mt					!inertia and mass, TC
+!!	real*4 len0,len0ct				!rest lengths,TA and CT
+!!	integer id(5)
+!!	integer rungep					!Runge Kutta function
+!!	data f,df/44*0./				!init. conditions
+!!	data epp/7*0./					!init. previous eps
+!!  Constants and measurements used in the model
+!!	data pi/3.14159/
+!!	data areac/.0000212,.0000122,.0000344,		!LCA,IA,PCA
+!!    &             .0000738,.0000409,			!CT,TA
+!!    &             .000005 ,.000005 /			!LIG,MUC
+!!	data len0ct/0.0138/				!CT rest length
+!!	data cosphi/0.76/				!dir. cosine of CT
+!!	data Cm/3*1.07,2.0,1.07/			!coeff for max act stress
+!!	data Ce/5*4.5,6.8,2.5/				!exp stress coeff
+!!	data sigm/3*100000.,87000.,105000./		!max active stress
+!!	data sig0/4*3000.,2000.,13000.,3000./		!stress @ zero strain
+!!	data sig2/4*50000.,55000.,45000.,65000./	!exp stress scale factor
+!!	data epm/0.2,0.2,0.2,0.2,0.4/			!strain @ max act stress
+!!	data depm/2.0,2.0,2.0,2.2,6.0/			!max shortening velocity
+!!	data ep/7*0./					!initial strains
+!!	data ep1/7*-0.5/				!strains @ zero stress
+!!	data ep2/5*0.2,.2,.1/				!strains @ exp stress
+!!	data Ia,Ma/0.0000016,0.00137/			!inertia, transl. mass
+!!	data It,Mt/0.0000100,0.01   /			!inertia, transl. mass
+!!	data gain/5*0.0/				!reflex gains
+!!	data ta/3*.005,.01,.01/				!activation times
+!!	data tn/5*0.040/				!reflex delay times
+!!	data ts/3*.073,.090,.044,.07,.06/		!series contr. times
+!!	data tp/3*.080,.100,.050,.08,.08/		!parall contr. times
+!!	data taua,taux,tauy/0.020,0.020,0.020/		!rot & trans time const.
+!!	data taur,taut/0.020,0.020/			!rot & trans time const.
+!!	data w,h/0.01106,0.01608/			!moment arms, CT and TA
+!!	data alplc,betlc,gamlc/-.198, .886, .00391/	!dir. cosines for LCA
+!!	data alpia,betia,gamia/-.697,-.644,-.00227/	!dir. cosines for IA
+!!	data alppc,betpc,gampc/-.639,-.253,-.00549/	!dir. cosines for PCA
+!!	data alpta,betta,gamta/ .015, .990,-.00123/	!dir. cosines for TA
+!
+!!	len0=0.01*len0					!convert to meters
+!!	act0(1)=a0lc
+!!	act0(2)=a0ia
+!!	act0(3)=a0pc
+!!	act0(4)=a0ct
+!!	act0(5)=a0ta
+!!	do j=1,5
+!!	 id(j)=tn(j)/dt1+.5				!reflex delays in samples
+!!	end do
+!!	jmax=.10/dt1+1.5				!max dim. of delay buff.
+!
+!
+!
+!
+!
+!! Kelvin Model input file
+!
+!
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!pass_var = [tau ctime EPSy dEPSy Sig dSig ATV SigPA SigMA 0.0 0.0 0.0];!!
+!!!!!!!!!!     1	 2    3     4   5,6  7,8  9   10    11    12  13  14 !!!
+!!tau	=pv(1) 			! time step
+!!ctime	=pv(2) 			! current time
+!!EPSy	=pv(3) 			! axial strain
+!!dEPSy	=pv(4) 			! derivative of axial strain
+!!Sig	=[pv(5) pv(6)] 		! axial stress, internal stress
+!!dSig	=[pv(7) pv(8)] 		! derivatives of stress
+!!ATV	=pv(9) 			! muscle activation amount (0-1)
+!!SigPA	=pv(10) 		! maximum passive stress
+!!SigMA	=pv(11) 		! maximum active stress
+
+
+
+
+
+
+
+

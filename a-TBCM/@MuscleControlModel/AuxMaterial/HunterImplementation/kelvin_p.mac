@@ -1,0 +1,180 @@
+!	kelvin.mac
+!==============================================================================
+!Purpose:     	Ansys APDL file written in support of a dissertation submitted
+!             	in partial fulfillment of the requirements of the degree of a 
+!		PhD of Speech Science in the Department of Speech Pathology
+!		and Audiology;	 University of Iowa
+!
+! This function represents the solution of the differential equations
+! using a fourth order runge-kutte method on Equations 21 and 22 from the paper...
+! E. J. Hunter, I. R. Titze, and F. Alipour, (2004) A three-dimensional 
+! model of vocal fold adduction/abduction. J.Acoust.Soc.Am. 115 (4):1747-1759
+! 
+! This function was taken from Ingo Titze's 'posture.for' for 'speak'.
+! Convertion to APDL with some modifications by eric hunter
+!
+!Description: 	Calculates the stress to apply to a node for nonlinear material
+!		given time step, time, strain, strain history, and activation
+!		All other muscle constants from Kelvin Model must
+!		also be provided.! muscles used in the model. 
+!
+!
+!USAGE:		tau ,time, eps,deps, atv,sigT,dsigT,sigI,dsigI,
+!		arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9
+!
+!RETURNS:	!SigI_	-internal stress
+!		!SigT_	-total stress
+!		!dSigI_	-internal stress
+!		!dSigT_	-total stress
+!		!E_	-youngs modulus from sig_p
+!		!Time1_	-time after runga-kutta
+!		!SigP_	-passive stress
+!
+!
+!
+!THE FOLLOWING VARIABLES ARE ASSUMED TO BE, WITH THESE NAMES
+!
+!sig0_ 	=Muscle_(musN_, 1) 	!! Passive stress (Pa) at EPSy(1)=0
+!sig2_ 	=Muscle_(musN_, 2) 	!! Scaling of exponential stress (50 kPa)
+!eps1_ 	=Muscle_(musN_, 3) 	!! Strain at zero stress
+!eps2_ 	=Muscle_(musN_, 4) 	!! Strain at exponential stress
+!B_   	=Muscle_(musN_, 5) 	!! Exponential strain constant
+!Tp_  	=Muscle_(musN_, 6) 	!! Parallel contraction time (sec)
+!Ts_  	=Muscle_(musN_, 7) 	!! Series contraction time (sec)
+!sigm_	=Muscle_(musN_, 8) 	!! Maximum active stress (Pa)
+!epsm_ 	=Muscle_(musN_, 9) 	!! Strain at Maximum active Stress
+!Cs_  	=Muscle_(musN_,10) 	!! Coef. for active stress strain curve
+!depsm_	=Muscle_(musN_,11) 	!! Maximum strain rate (1/sec)
+!Ti1_ 	=Muscle_(musN_,12) 	!! parameters for Ti = 0.02+0.1*EPSy(step)  
+!Ti2_ 	=Muscle_(musN_,13) 	! ...resulting in Ti = Ti1+Ti2*EPSy(step);
+!area_
+!
+!Macro File:  	kelvin.mac
+!Ansys Mode:  	Interactive or Batch 
+!
+!Written by:  	Eric J Hunter	3/7/01
+!
+!Revision:     	1.2
+!Last Revised: 	13 June 2001
+!
+!
+!All user defined commands and parameters end with an underscore
+!For all units are in MKS
+!
+!==============================================================================
+
+!!!!!!!!!!!!!!!
+!! Setup
+!F_= $ dF_=
+!*DIM,F_,ARRAY,2
+!*DIM,dF_,ARRAY,2
+!F_(1)=0,0
+!dF_(1)=0,0
+!!!
+!TIME1_=Time_
+!TAU_=dT_
+!!
+!!!!!!!!!!!!!!!
+
+
+!!!!!!!!!!!!!!!
+!! Setup
+F_= $ dF_=
+*DIM,F_,ARRAY,2
+*DIM,dF_,ARRAY,2
+F_(1)=arg6,arg8
+dF_(1)=arg7,arg9
+!!
+TIME1_=arg2
+TAU_=arg1
+!!
+!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!
+!! caluculate active stress 'siga_' using macro 'active'
+!!	Active returns active stress in 'tmp_'
+!! 	Active needs 'arg5,arg3,sigm_,Cs,epsm_,depsm_,arg4'
+*if,arg5,gt,0,then
+	!active,FibAtv_,FIB_EPS_(i_,j_,k_),sigm_,Cs_,epsm_,depsm_,0
+	active,arg5,arg3,sigm_,Cs_,epsm_,depsm_,arg4	
+ 	siga_	=tmp_					
+*else 
+	siga_	=0
+*endif
+!!
+!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!
+!! caluculate passive stress 'sigp_' using macro 'passive'
+!!	Passive returns passive stress in 'tmp_' and E in tmpE_
+!! 	Passive needs 'sig0_,sig2_,arg3,eps1_,eps2_,B_)
+!passive,sig0_,sig2_,FIB_EPS_(i_,j_,k_),eps1_,eps2_,B_
+passive,sig0_,sig2_,arg3,eps1_,eps2_,B_
+*if,arg3,gt,0,then
+	sigp_	=tmp_-arg3*20700
+*else
+	sigp_	=tmp_
+*endif
+E_	=tmpE_
+!!
+!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!
+!! calculate strain-dep. act. time
+!!	Maximum returns maximum of two variables in tmp_
+maximum,Ti1_,Ti1_+Ti2_*arg3
+Ti_	=tmp_
+!!
+!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!
+!! Runge-Kutta 4 routine...
+!!
+!! F_ is force vector of dimension N_
+!! dF_ is derivative of force vector
+!!
+*DIM,PHI_,ARRAY,5	! for RKfor
+*DIM,Y0_,ARRAY,5	! for RKfor
+Istat_=1             	! initialize status of RK4.
+!! 
+*do,M_,1,5,1,   !! keep running the loop until Istat==0.
+	*if,Istat_,eq,0,then
+		*exit
+	*endif
+
+   	rkfor,2,M_	! what it needs (N,F,DF,time,tau)
+   	*if,Ti_,gt,0,then
+	 	dF_(2)=(siga_-F_(2))/Ti_		!internal active stress	
+	*endif
+ 	tmp_=sigp_+Tp_*E_*arg4+F_(2)
+ 	dF_(1)=(-F_(1)+tmp_)/Ts_	!differential force eq.
+*enddo
+!!
+!!  end runge-kutta 
+!!!!!!!!!!!!!!!
+
+!writer,dF_(2)
+!writer,F_(2)
+
+!!!!!!!!!!!!!!!
+!! Return Sress
+SigT_=F_(1)	!total stress
+SigI_=F_(2)	!internal active stress
+dSigT_=dF_(1)	!total stress
+dSigI_=dF_(2)	!internal active stress
+SigP_=sigp_	!passive stress
+!!
+!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!
+!! Clean up all variables
+!! $ allows multiple commands on one line
+PHI_ = $ Y0_ = $ tmp_=
+siga_= $ Ti_= $ F_  = $ dF_=
+!!
+!!!!!!!!!!!!!!!
+
+
+
+
+

@@ -1,0 +1,16 @@
+! this is a function that gets the maximum for two variables
+!USAGE: pute the max of arg2 and arg3 in arg1, name max
+! arg1,arg2
+!
+!	Eric Hunter
+!
+
+!/nopr	! no output to output window
+
+*if,arg1,gt,arg2,then
+	tmp_=arg1
+*else 
+	tmp_=arg2
+*endif
+
+!/gopr	! resume output to output window

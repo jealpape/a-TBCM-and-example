@@ -1,0 +1,60 @@
+! This function was taken from Ingo Titze's 'posture.for' for speak.
+! Convertion to APDL on 2/28/01 by eric hunter
+!
+! This function represents Equation 13 from the paper...
+! E. J. Hunter, I. R. Titze, and F. Alipour, (2004) A three-dimensional 
+! model of vocal fold adduction/abduction. J.Acoust.Soc.Am. 115 (4):1747-1759
+!
+! USAGE:
+! sg0, sg2,epsy, ep1, ep2,   B, 
+!arg1,arg2,arg3,arg4,arg5,arg6
+
+!!!!!!!! Ingo's comments
+!  Function 'passive' computes the passive stress as a function of strain eps
+!  on the basis of five empirical constants (sg0,sg2,ep1,ep2,B). The Young's
+!  modulus E is also computed.
+!	function passive(sg0,sg2,eps,ep1,ep2,B,E)
+!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!/nopr	! no output to output window
+sig_lin_=-arg1*(arg3-arg4)/arg4				!linear portion
+*if,arg3,gt,arg5,then					!add exponential term
+	exptrm_=exp(arg6*(arg3-arg5))-1			!exponential term
+	sig_nln_=arg2*(exptrm_-arg6*(arg3-arg5))	!nonlinear portion
+	sgp_=sig_lin_+sig_nln_				!passive sytress
+	tmpE_=-arg1/arg4+arg2*arg6*exptrm_		!Young's modulus
+*elseif,arg3,ge,arg4,and,arg3,le,arg5,then		!linear term only
+	sgp_=sig_lin_					!passive stress
+	tmpE_=-arg1/arg4				!Young's modulus
+*else							!no fiber stress
+	sgp_=0						!passive stress
+	tmpE_=0						!Young's modulus
+*endif
+tmp_=sgp_
+
+
+! Clean up all variables
+! $ allows multiple commands on one line
+sig_lin_= $ exptrm_= $ sig_nln_= $ sgp_= 
+
+!/gopr	! resume output to output window
+
+
+
+
+!sig_lin_=-sg0_*(eps_-ep1_)/ep1_			!linear portion
+!*if,eps_.gt.ep2_,then				!add exponential term
+!	exptrm_=exp(B_*(eps_-ep2_))-1			!exponential term
+!	sig_nln_=sg_*(exptrm_-B_*(eps_-ep2_))		!nonlinear portion
+!	sgp_=sig_lin_+sig_nln_				!passive sytress
+!	E_=-sg0_/ep1_+sg2_*B_*exptrm_			!Young's modulus
+!*elseif,eps_.ge.ep1_.and.eps_.le.ep2_,then		!linear term only
+!	sgp_=sig_lin_					!passive stress
+!	E_=-sg0_/ep1_					!Young's modulus
+!*else						!no fiber stress
+!	sgp_=0						!passive stress
+!	E_=0						!Young's modulus
+!*endif
+
+
+
